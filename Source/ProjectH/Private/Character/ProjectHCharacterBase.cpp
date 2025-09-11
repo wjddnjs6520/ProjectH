@@ -1,13 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/ProjectHCharacterBase.h"
+#include "AbilitySystem/Attribute/ProjectHAttributeSet.h"
+#include "AbilitySystem/ProjectHAbilitySystemComponent.h"
 
 // Sets default values
 AProjectHCharacterBase::AProjectHCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	AbilitySystemComponent = CreateDefaultSubobject<UProjectHAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 
 }
 
@@ -18,17 +21,38 @@ void AProjectHCharacterBase::BeginPlay()
 	
 }
 
-// Called every frame
-void AProjectHCharacterBase::Tick(float DeltaTime)
+void AProjectHCharacterBase::PossessedBy(AController* NewController)
 {
-	Super::Tick(DeltaTime);
+	Super::PossessedBy(NewController);
 
+	InitialSetting();
 }
 
-// Called to bind functionality to input
-void AProjectHCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+UAbilitySystemComponent* AProjectHCharacterBase::GetAbilitySystemComponent() const
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	return AbilitySystemComponent;
+}
 
+void AProjectHCharacterBase::InitialSetting()
+{
+	if (!AbilitySystemComponent || !CharacterData)
+		return;
+
+	if (CharacterData->AttributeSetClass)
+	{
+		AttributeSet = NewObject<UProjectHAttributeSet>(AbilitySystemComponent, CharacterData->AttributeSetClass);
+		AbilitySystemComponent->AddAttributeSetSubobject(AttributeSet);
+	}
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	for (auto &AbilityClass : CharacterData->DefaultAbilities)
+	{
+		if (AbilityClass)
+		{
+			FGameplayAbilitySpec AbilitySpec(AbilityClass, 1); // 레벨 1 기본
+			AbilitySystemComponent->GiveAbility(AbilitySpec);
+		}
+	}
 }
 
