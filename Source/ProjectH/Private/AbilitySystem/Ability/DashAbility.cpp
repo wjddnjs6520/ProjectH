@@ -27,6 +27,12 @@ void UDashAbility::ActivateAbility(
     UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
     if (!ASC) return;
 
+    if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
+    {
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+        return;
+    }
+
     // 1️⃣ Dash 태그 부여
     FGameplayTag DashTag = Stat_Player_Immune;
     ASC->AddLooseGameplayTag(DashTag);
