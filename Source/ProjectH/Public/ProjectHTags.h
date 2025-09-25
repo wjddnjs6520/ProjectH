@@ -25,6 +25,7 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cooldown_ReactHit);
 
 //Data Tag
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Cooldown);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(Data_Damagemultiple);
 
 //Cue Tag
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(GamePlayCue_Ability_Player_DefaultAttack);

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
 #include "GameplayEffect.h"
+#include "AbilitySystem/Attribute/ProjectHAttributeSet.h"
 #include "WeaponAttackData.generated.h"
 
 USTRUCT(BlueprintType)

@@ -10,7 +10,7 @@ UProjectHAttributeSet::UProjectHAttributeSet()
     InitAttackPower(10.f);
     InitSpellPower(10.f);
     InitCritRate(5.f);
-    InitCritDamage(150.f);
+    InitCritDamage(1.5f);
     InitCooldownReduction(0.0f);
     InitDefense(0.f);
     InitDamageReduction(0.f);

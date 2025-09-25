@@ -20,6 +20,7 @@ UE_DEFINE_GAMEPLAY_TAG(Cooldown_ReactHit, "Cooldown.ReactHit");
 
 //Data Tag
 UE_DEFINE_GAMEPLAY_TAG(Data_Cooldown, "Data.Cooldown");
+UE_DEFINE_GAMEPLAY_TAG(Data_Damagemultiple, "Data.Damagemultiple");
 
 //Cue Tag
 UE_DEFINE_GAMEPLAY_TAG(GamePlayCue_Ability_Player_DefaultAttack, "GamePlayCue.Ability.Player.DefaultAttack");

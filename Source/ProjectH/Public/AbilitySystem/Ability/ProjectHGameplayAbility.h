@@ -15,17 +15,15 @@ class PROJECTH_API UProjectHGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 public:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cooldown")
-    TSubclassOf<UGameplayEffect> CooldownGameplayEffect;
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Cooldown")
+    UGameplayEffect* CooldownGameplayEffect;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cooldown")
-    float BaseCooldown = 1.0f;
+    float BaseCooldown = 5.0f;
 
     // 이 어빌리티가 실행할 GameplayCue 태그
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
     FGameplayTag AttackVFXCue;
 
-
-    // Ability Commit 시점에 쿨타임 적용
-    bool ApplyCooldownGE();
+    void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 };

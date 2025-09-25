@@ -21,12 +21,6 @@ void UDefaultAttackAbility::ActivateAbility(
 	const FGameplayEventData* TriggerEventData
 )
 {
-	if (!ApplyCooldownGE())
-	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
-		return;
-	}
-
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);

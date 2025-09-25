@@ -43,12 +43,6 @@ void UDashAbility::ActivateAbility(
     UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
     if (!ASC) return;
 
-    if (!ApplyCooldownGE())
-    {
-        EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-        return;
-    }
-
     if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
     {
         EndAbility(Handle, ActorInfo, ActivationInfo, true, false);

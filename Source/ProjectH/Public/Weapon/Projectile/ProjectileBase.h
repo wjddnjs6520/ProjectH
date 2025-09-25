@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-
 #include "ProjectileBase.generated.h"
 
 class UBoxComponent;
@@ -13,6 +12,7 @@ class UProjectileMovementComponent;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class UGameplayEffect;
+
 
 UCLASS()
 class PROJECTH_API AProjectileBase : public AActor
@@ -23,8 +23,18 @@ public:
 	AProjectileBase();
 
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
-	void InitialSetting(const FVector& CollisionSize, bool bFireImmediately, const FVector& ShootDir, float LifeTime = 5.f, bool bPenetrate = false);
+	void InitialSetting(
+		const FVector& CollisionSize,
+		bool bFireImmediately,
+		const FVector& ShootDir,
+		float LifeTime = 5.f,
+		bool bPenetrate = false,
+		float MaxSpeed = 2000.f,
+		float InitSpeed = 1500.f
+	);
 
+	UFUNCTION(BlueprintCallable, Category = "Projectile")
+	void DamageSetting(const float Damagemutiple);
 
 protected:
 	virtual void BeginPlay() override;
@@ -45,10 +55,16 @@ protected:
 	UNiagaraSystem* ImpactVFX;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effect")
-	TSubclassOf<UGameplayEffect> ProjectileEffect;
+	TSubclassOf<UGameplayEffect> ProjectileHitEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effect")
+	TSubclassOf<UGameplayEffect> ProjectileDamageEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	bool bCanPenetrate = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	bool bFiretile = false;
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -61,4 +77,7 @@ protected:
 	UFUNCTION()
 	void DisableCollisionAfterDelay(float DelayTime = 0.2f);
 
+	/** 계수 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float AbilityDamagemutiple = 1.f;
 };

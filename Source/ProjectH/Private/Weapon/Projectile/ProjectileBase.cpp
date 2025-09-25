@@ -13,6 +13,7 @@
 #include "AbilitySystem/ProjectHAbilitySystemComponent.h"
 
 #include "Character/ProjectHEnemyBase.h"
+#include "ProjectHTags.h"
 
 // Sets default values
 AProjectileBase::AProjectileBase()
@@ -38,16 +39,18 @@ AProjectileBase::AProjectileBase()
     TrailVFX->bAutoActivate = true;
 }
 
-void AProjectileBase::InitialSetting(const FVector& CollisionSize, bool bFireImmediately, const FVector& ShootDir, float LifeTime, bool bPenetrate)
+void AProjectileBase::InitialSetting(
+    const FVector& CollisionSize, 
+    bool bFireImmediately, 
+    const FVector& ShootDir, 
+    float LifeTime, 
+    bool bPenetrate, 
+    const float MaxSpeed, 
+    const float InitSpeed)
 {
     if (UBoxComponent* Box = Cast<UBoxComponent>(CollisionComp))
     {
         Box->SetBoxExtent(CollisionSize);
-    }
-
-    if (bFireImmediately)
-    {
-        FireInDirection(ShootDir);
     }
 
     if (LifeTime > 0.f)
@@ -56,6 +59,17 @@ void AProjectileBase::InitialSetting(const FVector& CollisionSize, bool bFireImm
     }
 
     bCanPenetrate = bPenetrate;
+    bFiretile = bFireImmediately;
+
+    ProjectileMovement->MaxSpeed = MaxSpeed;
+    ProjectileMovement->InitialSpeed = InitSpeed;
+
+    FireInDirection(ShootDir);
+}
+
+void AProjectileBase::DamageSetting(const float Damagemutiple)
+{
+    AbilityDamagemutiple = Damagemutiple;
 }
 
 // Called when the game starts or when spawned
@@ -75,46 +89,53 @@ void AProjectileBase::BeginPlay()
 }
 
 void AProjectileBase::OnOverlapBegin(
-    UPrimitiveComponent* OverlappedComp, 
-    AActor* OtherActor, 
-    UPrimitiveComponent* OtherComp, 
-    int32 OtherBodyIndex, 
-    bool bFromSweep, 
+    UPrimitiveComponent* OverlappedComp,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
     const FHitResult& SweepResult)
 {
-    if (!OtherActor || OtherActor == this)
-    {
-        return;
-    }
-
-    if (!ProjectileEffect)
-    {
-        return;
-    }
+    if (!OtherActor || OtherActor == this) return;
 
     AProjectHEnemyBase* Enemy = Cast<AProjectHEnemyBase>(OtherActor);
-    if (!Enemy)
-    {
-        return;
-    }
+    if (!Enemy) return;
 
     UAbilitySystemComponent* EnemyASC = Enemy->GetAbilitySystemComponent();
-    if (!EnemyASC)
-    {
-        return;
-    }
+    if (!EnemyASC) return;
 
     FGameplayEffectContextHandle EffectContext = EnemyASC->MakeEffectContext();
-    EffectContext.AddSourceObject(this);
+    EffectContext.AddInstigator(GetOwner(), Cast<APawn>(GetOwner()));
 
-    FGameplayEffectSpecHandle SpecHandle = EnemyASC->MakeOutgoingSpec(ProjectileEffect, 1.f, EffectContext);
-    if (SpecHandle.IsValid())
+    //
+    if (ProjectileHitEffect)
     {
-        EnemyASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-        if (!bCanPenetrate)
+        FGameplayEffectSpecHandle HitSpec = EnemyASC->MakeOutgoingSpec(ProjectileHitEffect, 1.f, EffectContext);
+        if (HitSpec.IsValid())
         {
-            DisableCollisionAfterDelay(0.2f);
+            EnemyASC->ApplyGameplayEffectSpecToSelf(*HitSpec.Data.Get());
         }
+    }
+
+    //
+    if (ProjectileDamageEffect)
+    {
+        FGameplayEffectSpecHandle DamageSpec = EnemyASC->MakeOutgoingSpec(ProjectileDamageEffect, 1.f, EffectContext);
+        if (DamageSpec.IsValid() && DamageSpec.Data.IsValid())
+        {
+            DamageSpec.Data->SetSetByCallerMagnitude(Data_Damagemultiple, AbilityDamagemutiple);
+            EnemyASC->ApplyGameplayEffectSpecToSelf(*DamageSpec.Data.Get());
+        }
+    }
+
+    // 발사체 처리
+    if (bFiretile)
+    {
+        if (!bCanPenetrate) Destroy();
+    }
+    else
+    {
+        DisableCollisionAfterDelay(0.2f);
     }
 }
 

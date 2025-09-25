@@ -6,33 +6,39 @@
 #include "AbilitySystem/Attribute/ProjectHAttributeSet.h"
 #include "ProjectHTags.h"
 
-bool UProjectHGameplayAbility::ApplyCooldownGE()
+
+void UProjectHGameplayAbility::ApplyCooldown(
+    const FGameplayAbilitySpecHandle Handle, 
+    const FGameplayAbilityActorInfo* ActorInfo, 
+    const FGameplayAbilityActivationInfo ActivationInfo) const
 {
-    UAbilitySystemComponent* ASC = CurrentActorInfo->AbilitySystemComponent.Get();
-    if (!ASC || !CooldownGameplayEffect) return false;
+    if (!ActorInfo) return;
+
+    UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+    UGameplayEffect* CooldownGE = GetCooldownGameplayEffect();
+    if (!ASC || !CooldownGE) return;
 
     float CooldownReduction = 0.f;
     if (const UProjectHAttributeSet* AttrSet = ASC->GetSet<UProjectHAttributeSet>())
     {
-        CooldownReduction = AttrSet->GetCooldownReduction();
+        CooldownReduction = FMath::Clamp(AttrSet->GetCooldownReduction(), 0.f, 0.95f);
     }
 
     float ModifiedCooldown = BaseCooldown * (1.f - CooldownReduction);
 
     // SpecHandle 생성
-    FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(CooldownGameplayEffect, GetAbilityLevel(), ASC->MakeEffectContext());
-    if (SpecHandle.IsValid() && SpecHandle.Data.IsValid())
+    FGameplayEffectSpecHandle CooldownSpec = ASC->MakeOutgoingSpec(
+        CooldownGE->GetClass(),
+        GetAbilityLevel(Handle, ActorInfo),
+        ASC->MakeEffectContext()
+    );
+
+    if (CooldownSpec.IsValid() && CooldownSpec.Data.IsValid())
     {
-        // Duration을 SetByCaller 값으로 전달
-        SpecHandle.Data->SetSetByCallerMagnitude(Data_Cooldown, ModifiedCooldown);
+        // SetByCaller로 Duration 전달
+        CooldownSpec.Data->SetSetByCallerMagnitude(Data_Cooldown, ModifiedCooldown);
 
-        // GE 적용
-        ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-
-        UE_LOG(LogTemp, Warning, TEXT("[Cooldown] Applied: %f sec"), ModifiedCooldown);
-        return true;
+        UE_LOG(LogTemp, Warning, TEXT("[ApplyCooldown] Prepared SetByCaller Duration: %f"), ModifiedCooldown);
+        ASC->ApplyGameplayEffectSpecToSelf(*CooldownSpec.Data.Get());
     }
-
-    return false;
 }
-
