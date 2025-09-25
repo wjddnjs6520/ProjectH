@@ -6,6 +6,7 @@
 #include "AbilitySystem/Ability/ProjectHGameplayAbility.h"
 #include "DefaultAttackAbility.generated.h"
 
+class AProjectileBase;
 /**
  * 
  */
@@ -31,4 +32,30 @@ public:
         bool bReplicateEndAbility,
         bool bWasCancelled
     ) override;
+
+protected:
+    /** 발사할 Projectile 클래스 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+    TSubclassOf<AProjectileBase> ProjectileClass;
+
+    /** 콜리전 크기 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+    FVector CollisionSize = FVector(10.f, 10.f, 10.f);
+
+    /** 발사체 수명 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+    float ProjectileLifeTime = 5.f;
+
+    /** 관통 여부 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+    bool bCanPenetrate = false;
+
+    /** 초기 발사 여부 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+    bool bFireImmediately = true;
+
+    /** 초기 발사 방향 (보통 캐릭터 전방) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+    FVector InitialShootDirection = FVector::ForwardVector;
+
 };

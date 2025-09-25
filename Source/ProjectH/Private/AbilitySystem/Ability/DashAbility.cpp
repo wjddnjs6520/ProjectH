@@ -9,6 +9,7 @@
 #include "Character/ProjectHPlayerController.h"
 #include "Components/CapsuleComponent.h"
 
+
 UDashAbility::UDashAbility()
 {
 }
@@ -20,12 +21,33 @@ void UDashAbility::ActivateAbility(
     const FGameplayEventData* TriggerEventData
 )
 {
-    if (!ActorInfo || !ActorInfo->AvatarActor.IsValid()) return;
+    if (!ActorInfo)
+    {
+        UE_LOG(LogTemp, Error, TEXT("DashAbility::ActivateAbility - ActorInfo is nullptr!"));
+        return;
+    }
+
+    if (!ActorInfo->AvatarActor.IsValid())
+    {
+        UE_LOG(LogTemp, Error, TEXT("DashAbility::ActivateAbility - AvatarActor invalid!"));
+        return;
+    }
+
     ACharacter* Character = Cast<ACharacter>(ActorInfo->AvatarActor.Get());
-    if (!Character) return;
+    if (!Character)
+    {
+        UE_LOG(LogTemp, Error, TEXT("DashAbility::ActivateAbility - Failed to cast to Character"));
+        return;
+    }
 
     UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
     if (!ASC) return;
+
+    if (!ApplyCooldownGE())
+    {
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+        return;
+    }
 
     if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
     {
@@ -75,12 +97,8 @@ void UDashAbility::ActivateAbility(
         float Alpha = FMath::Clamp(ElapsedTime / DashDuration, 0.f, 1.f);
         FVector NewLoc = FMath::Lerp(StartLocation, TargetLocation, Alpha);
         Character->SetActorLocation(NewLoc, true);
-
-        UE_LOG(LogTemp, Warning, TEXT("Dash Moving: Alpha=%f, Location=%s"), Alpha, *NewLoc.ToString());
-
         if (Alpha >= 1.f)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Dash End: Calling EndAbility"));
             EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
         }
         });

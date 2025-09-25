@@ -19,7 +19,8 @@ public class ProjectH : ModuleRules
 			"GameplayAbilities",
 			"GameplayTasks",
 			"GameplayTags",
-		
+            "Niagara",
+
 			// AI
 			"AIModule",
 			"NavigationSystem"

@@ -20,6 +20,8 @@ public:
 	// Sets default values for this character's properties
 	AProjectHCharacterBase();
 
+	/** IAbilitySystemInterface 구현 */
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -33,8 +35,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
 	UProjectHAttributeSet* AttributeSet;
 
-	/** IAbilitySystemInterface 구현 */
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
 
 	UFUNCTION(BlueprintCallable)
 	void InitialSetting();
